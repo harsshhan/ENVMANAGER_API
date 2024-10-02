@@ -34,7 +34,7 @@ async def new_project(data: Newproject):
         project_collection = db['projects']
         project_collection.insert_one(new_project_data)
 
-        return {"detail": "Project added successfully", "project_id": new_project_data}
+        return {"detail": "Project added successfully", "project": new_project_data}
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to add project: {str(e)}")
