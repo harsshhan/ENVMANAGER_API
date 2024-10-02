@@ -3,6 +3,7 @@ from database import db
 from model import Newenv,Newproject,Editenv,DeleteEnv,Project,UserProjectsResponse
 import uuid
 import json
+from fastapi.encoders import jsonable_encoder
 
 app=FastAPI()
 
@@ -34,7 +35,12 @@ async def new_project(data: Newproject):
         project_collection = db['projects']
         project_collection.insert_one(new_project_data)
 
-        return {"detail": "Project added successfully", "project": new_project_data}
+        response = jsonable_encoder({
+            "detail": "Project added successfully",
+            "project_id": project_id,  
+            "project_name": data.project_name
+        })
+        return response
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to add project: {str(e)}")
