@@ -1,6 +1,6 @@
 from fastapi import FastAPI,HTTPException
 from database import db
-from model import Newenv,Newproject,Editenv,DeleteEnv,Project,UserProjectsResponse
+from model import Newenv,Newproject,Editenv,DeleteEnv,Project,UserProjectsResponse,DeleteProject
 import uuid
 import json
 from fastapi.encoders import jsonable_encoder
@@ -111,12 +111,17 @@ async def edit_env(data: Editenv):
 
 
 #delete project 
-@app.delete('/deleteproject/{id}')
-async def delete_project(id:str):
+@app.delete('/deleteproject')
+async def delete_project(data: DeleteProject):
     try:
         collection=db['projects']
-        result=collection.delete_one({"project_id":id})
+        result=collection.delete_one({"project_id":data.project_id})
+
         user_collection=db['user']
+        
+        user_collection.update_one({'email':data.email},{'$pull':{'admin':data.project_id}})
+
+
         if result.deleted_count == 0:
             raise HTTPException(status_code=404, detail="Project not found")
         return {"message": "Project deleted successfully"}

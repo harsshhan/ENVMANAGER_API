@@ -28,3 +28,7 @@ class Project(BaseModel):
 
 class UserProjectsResponse(BaseModel):
     projects: List[Project]
+
+class DeleteProject(BaseModel):
+    email:str
+    project_id:str
