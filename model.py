@@ -32,3 +32,7 @@ class UserProjectsResponse(BaseModel):
 class DeleteProject(BaseModel):
     email:str
     project_id:str
+
+class AddDeveloper(BaseModel):
+    project_id:str
+    email:str

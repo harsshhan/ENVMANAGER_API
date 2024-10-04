@@ -1,6 +1,6 @@
 from fastapi import FastAPI,HTTPException
 from database import db
-from model import Newenv,Newproject,Editenv,DeleteEnv,Project,UserProjectsResponse,DeleteProject
+from model import *
 import uuid
 import json
 from fastapi.encoders import jsonable_encoder
@@ -10,6 +10,7 @@ app=FastAPI()
 @app.get('/')
 def main():
     return "Server Running Successfully"
+
 
 
 #adding new project
@@ -144,3 +145,26 @@ async def delete_env(data:DeleteEnv):
     except Exception as e:
         
         return HTTPException(status_code=500,detail=f'Failed to delete env data : {str(e)}')
+
+
+#adding developer to the project by admin
+@app.post('/add_developer')
+async def add_developer(data:AddDeveloper):
+    try:
+        collection=db['user']
+        user=collection.find_one({'email':data.email})
+        print(data.email)
+        if not user:
+            raise HTTPException(status_code=403,detail='User does not exist')
+        if data.project_id in user.get('developer', []):
+            raise HTTPException(status_code=400, detail="Project already exists for this user")
+        result = collection.update_one({'email':data.email},{'$addToSet':{'developer':data.project_id}})
+
+        if result.modified_count==0:
+            raise HTTPException(status_code=404,detail='Failed to Update')
+        return {'message':'Updated Successfully'}
+        
+    except HTTPException as e:
+        raise e
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f'Failed to add: {str(e)}')
