@@ -12,6 +12,14 @@ def main():
     return "Server Running Successfully"
 
 
+#new user
+@app.post('/newuser/{email}')
+async def new_user(email:str):
+    collection=db['user']
+    new_user_data = {'email': email, 'admin': [], 'developer': []}
+    collection.insert_one(new_user_data)
+    return "New user added"
+
 
 #adding new project
 @app.post('/newproject')
@@ -19,14 +27,9 @@ async def new_project(data: Newproject):
     try:
         collection = db['user']
         project_id = str(uuid.uuid4())
+        
+        collection.update_one({"email": data.email}, {'$addToSet': {"admin": project_id}})
 
-        existing_user = collection.find_one({'email': data.email})
-
-        if existing_user:
-            collection.update_one({"email": data.email}, {'$addToSet': {"admin": project_id}})
-        else:
-            new_user_data = {'email': data.email, 'admin': [project_id], 'developer': []}
-            collection.insert_one(new_user_data)
 
         new_project_data = {
             'project_id': project_id,
@@ -157,7 +160,7 @@ async def add_developer(data:AddDeveloper):
         if not user:
             raise HTTPException(status_code=403,detail='User does not exist')
         if data.project_id in user.get('developer', []):
-            raise HTTPException(status_code=400, detail="Project already exists for this user")
+            raise HTTPException(status_code=400, detail="Project already assigned for this user")
         result = collection.update_one({'email':data.email},{'$addToSet':{'developer':data.project_id}})
 
         if result.modified_count==0:
