@@ -179,3 +179,17 @@ async def add_developer(data:AddDeveloper):
         raise e
     except Exception as e:
         raise HTTPException(status_code=500, detail=f'Failed to add: {str(e)}')
+
+
+@app.get('/projects/{project_id}')
+async def get_project_envs(project_id: str):
+    collection = db['projects']
+    
+    project = collection.find_one({"project_id": project_id})
+    
+    if not project:
+        raise HTTPException(status_code=404, detail="Project not found")
+    
+    return {
+        "env": project.get('envs', [])
+    }
