@@ -15,10 +15,13 @@ def main():
 #new user
 @app.post('/newuser/{email}')
 async def new_user(email:str):
-    collection=db['user']
-    new_user_data = {'email': email, 'admin': [], 'developer': []}
-    collection.insert_one(new_user_data)
-    return "New user added"
+    try:
+        collection=db['user']
+        new_user_data = {'email': email, 'admin': [], 'developer': []}
+        collection.insert_one(new_user_data)
+        return "New user added"
+    except Exception as e:
+        return HTTPException(status_code=400,detail=str(e))
 
 
 #adding new project
