@@ -16,10 +16,14 @@ def main():
 @app.post('/newuser/{email}')
 async def new_user(email:str):
     try:
-        collection=db['user']
+        existing_user = collection.find_one({"email": email})
+        if existing_user:
+            return {"message":"User already exists"}
+
         new_user_data = {'email': email, 'admin': [], 'developer': []}
         collection.insert_one(new_user_data)
-        return "New user added"
+        return {"message": "New user added"}
+
     except Exception as e:
         return HTTPException(status_code=400,detail=str(e))
 
