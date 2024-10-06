@@ -16,6 +16,7 @@ def main():
 @app.post('/newuser/{email}')
 async def new_user(email:str):
     try:
+        collection=db['user']
         existing_user = collection.find_one({"email": email})
         if existing_user:
             return {"message":"User already exists"}
